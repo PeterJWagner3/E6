@@ -6,7 +6,7 @@ source('~/Documents/R_Projects/Common_R_Source_Files/General_Plot_Templates.r');
 load("~/Documents/R_Projects/Data_for_R/Gradstein_2020_Augmented.RData"); # refined Gradstein 2020 timescale & biozonations
 #source('~/Documents/R_Projects/Common_R_Source_Files/Data_Downloading_v4.r');  #
 
-thomas <- read.xlsx("Ecosystem_Earth_Systems_Engineers_Table_1.xlsx");
+thomas <- as.data.frame(read.xlsx("Ecosystem_Earth_Systems_Engineers_Table_1.xlsx"));
 
 strat_unit <- periods;
 # Get those Strat Units from the Gradstein scale file

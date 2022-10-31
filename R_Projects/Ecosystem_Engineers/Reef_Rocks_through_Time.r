@@ -15,27 +15,27 @@ return(sum(pbdb_find_taxa %in% taxon));
 stage_slices <- gradstein_2020_emended$time_scale[gradstein_2020_emended$time_scale$scale %in% "Stage Slice",];
 stage_slices$interval <- stage_slices$st;
 stage_slices <- stage_slices[order(-stage_slices$ma_lb),];
-pbdb_sites <- pbdb_data_list$pbdb_sites_refined;
+pbdb_sites <- pbdb_data_list_smol$pbdb_sites;
 pbdb_sites$bin_lb <- match(pbdb_sites$interval_lb,stage_slices$interval);
 pbdb_sites$bin_ub <- match(pbdb_sites$interval_ub,stage_slices$interval);
 pbdb_reef_sites <- pbdb_sites[pbdb_sites$environment %in% reef_environments,];
-reef_phyla <- sort(unique(pbdb_data_list$pbdb_finds$phylum[pbdb_data_list$pbdb_finds$collection_no %in% pbdb_reef_sites$collection_no]));
+reef_phyla <- sort(unique(pbdb_data_list_smol$pbdb_finds$phylum[pbdb_data_list_smol$pbdb_finds$collection_no %in% pbdb_reef_sites$collection_no]));
 reef_phyla <- reef_phyla[!reef_phyla %in% c("","NO_PHYLUM_SPECIFIED","Problematica",land_plants)];
 rphyla <- length(reef_phyla);
-relv_finds <- pbdb_data_list$pbdb_finds[!pbdb_data_list$pbdb_finds$phylum %in% land_plants,]
+relv_finds <- pbdb_data_list_smol$pbdb_finds[!pbdb_data_list_smol$pbdb_finds$phylum %in% land_plants,]
 reef_classes <- sort(unique(relv_finds$class));
 reef_classes <- reef_classes[!reef_classes %in% c("","NO_CLASS_SPECIFIED")];
 rclass <- length(reef_classes);
 nslice <- nrow(stage_slices);
 
-archaeocyath_finds <- pbdb_data_list$pbdb_finds[pbdb_data_list$pbdb_finds$class=="Archaeocyatha",];
+archaeocyath_finds <- pbdb_data_list_smol$pbdb_finds[pbdb_data_list_smol$pbdb_finds$class=="Archaeocyatha",];
 archaeocyath_sites <- pbdb_sites[pbdb_sites$collection_no %in% archaeocyath_finds$collection_no,];
-max(archaeocyath_sites$ma_lb)
-max(archaeocyath_sites$ma_ub)
-min(archaeocyath_sites$ma_lb)
-min(archaeocyath_sites$ma_ub)
+max(archaeocyath_sites$ma_lb);
+max(archaeocyath_sites$ma_ub);
+min(archaeocyath_sites$ma_lb);
+min(archaeocyath_sites$ma_ub);
 
-stromatoporoid_finds <- pbdb_data_list$pbdb_finds[pbdb_data_list$pbdb_finds$class=="Stromatoporoidea",]
+stromatoporoid_finds <- pbdb_data_list_smol$pbdb_finds[pbdb_data_list_smol$pbdb_finds$class=="Stromatoporoidea",]
 stromatoporoid_sites <- pbdb_reef_sites[pbdb_reef_sites$collection_no %in% stromatoporoid_finds$collection_no,];
 max(stromatoporoid_sites$ma_lb)
 max(stromatoporoid_sites$ma_ub)
@@ -43,7 +43,7 @@ min(stromatoporoid_sites$ma_lb)
 min(stromatoporoid_sites$ma_ub)
 
 rudists <- c("Caprinulidae","Caprotinidae","Diceratidae","Hippuritidae","Monopleuridae","Plagioptychidae","Polyconitidae","Radiolitidae","Trechmannellidae");
-rudist_finds <- pbdb_data_list$pbdb_finds[pbdb_data_list$pbdb_finds$family %in% rudists,]
+rudist_finds <- pbdb_data_list_smol$pbdb_finds[pbdb_data_list_smol$pbdb_finds$family %in% rudists,]
 rudist_sites <- pbdb_sites[pbdb_sites$collection_no %in% rudist_finds$collection_no,];
 max(rudist_sites$ma_lb)
 max(rudist_sites$ma_ub)
@@ -64,7 +64,7 @@ for (ns in 1:nslice)	{
 	slice_sites_reefs <- slice_sites_reefs[!slice_sites_reefs$environment %in% "perireef or subreef",];
 	if (nrow(slice_sites_reefs)>0)	{
 		bin_reef_rocks[ns] <- length(bin_rock_nos);
-		slice_reef_finds <- pbdb_data_list$pbdb_finds[pbdb_data_list$pbdb_finds$collection_no %in% slice_sites_reefs$collection_no,];
+		slice_reef_finds <- pbdb_data_list_smol$pbdb_finds[pbdb_data_list_smol$pbdb_finds$collection_no %in% slice_sites_reefs$collection_no,];
 		bin_rock_nos <- unique(slice_sites_reefs$pbdb_rock_no_sr[slice_sites_reefs$pbdb_rock_no_sr>0]);
 		taxon <- reef_phyla;
 		phylum_reef_counts[ns,] <- sapply(taxon,count_taxa_from_pbdb_finds,pbdb_find_taxa=slice_reef_finds$phylum);

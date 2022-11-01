@@ -13,7 +13,6 @@ return(sum(pbdb_find_taxa %in% taxon));
 }
 
 stage_slices <- gradstein_2020_emended$time_scale[gradstein_2020_emended$time_scale$scale %in% "Stage Slice",];
-stage_slices$interval <- stage_slices$st;
 stage_slices <- stage_slices[order(-stage_slices$ma_lb),];
 pbdb_sites <- pbdb_data_list_smol$pbdb_sites;
 pbdb_sites$bin_lb <- match(pbdb_sites$interval_lb,stage_slices$interval);
@@ -30,64 +29,69 @@ nslice <- nrow(stage_slices);
 
 archaeocyath_finds <- pbdb_data_list_smol$pbdb_finds[pbdb_data_list_smol$pbdb_finds$class=="Archaeocyatha",];
 archaeocyath_sites <- pbdb_sites[pbdb_sites$collection_no %in% archaeocyath_finds$collection_no,];
-max(archaeocyath_sites$ma_lb);
-max(archaeocyath_sites$ma_ub);
-min(archaeocyath_sites$ma_lb);
-min(archaeocyath_sites$ma_ub);
+#max(archaeocyath_sites$ma_lb);
+#max(archaeocyath_sites$ma_ub);
+#min(archaeocyath_sites$ma_lb);
+#min(archaeocyath_sites$ma_ub);
 
 stromatoporoid_finds <- pbdb_data_list_smol$pbdb_finds[pbdb_data_list_smol$pbdb_finds$class=="Stromatoporoidea",]
 stromatoporoid_sites <- pbdb_reef_sites[pbdb_reef_sites$collection_no %in% stromatoporoid_finds$collection_no,];
-max(stromatoporoid_sites$ma_lb)
-max(stromatoporoid_sites$ma_ub)
-min(stromatoporoid_sites$ma_lb)
-min(stromatoporoid_sites$ma_ub)
+#max(stromatoporoid_sites$ma_lb)
+#max(stromatoporoid_sites$ma_ub)
+#min(stromatoporoid_sites$ma_lb)
+#min(stromatoporoid_sites$ma_ub)
 
 rudists <- c("Caprinulidae","Caprotinidae","Diceratidae","Hippuritidae","Monopleuridae","Plagioptychidae","Polyconitidae","Radiolitidae","Trechmannellidae");
 rudist_finds <- pbdb_data_list_smol$pbdb_finds[pbdb_data_list_smol$pbdb_finds$family %in% rudists,]
 rudist_sites <- pbdb_sites[pbdb_sites$collection_no %in% rudist_finds$collection_no,];
-max(rudist_sites$ma_lb)
-max(rudist_sites$ma_ub)
+#max(rudist_sites$ma_lb)
+#max(rudist_sites$ma_ub)
 
 bin_rocks <- bin_reef_rocks <- vector(length=nslice);
-names(bin_rocks) <- stage_slices$st;
+names(bin_rocks) <- stage_slices$interval;
 phylum_reef_counts <- data.frame(array(0,dim=c(nslice,rphyla)));
 class_reef_counts <- data.frame(array(0,dim=c(nslice,rclass)));
 
-rownames(class_reef_counts) <- rownames(phylum_reef_counts) <- stage_slices$st;
+rownames(class_reef_counts) <- rownames(phylum_reef_counts) <- stage_slices$interval;
 colnames(phylum_reef_counts) <- reef_phyla;
 colnames(class_reef_counts) <- reef_classes;
 phylum_reef_dominance <- phylum_reef_counts;
 class_reef_dominance <- class_reef_counts;
+# tally taxon dominance from reefs from each time slice
 for (ns in 1:nslice)	{
 	slice_sites <- pbdb_sites[pbdb_sites$bin_lb==ns & pbdb_sites$bin_ub==ns,];
+	bin_rock_nos <- unique(slice_sites$pbdb_rock_no_sr[slice_sites$pbdb_rock_no_sr>0]);
+	bin_rocks[ns] <- length(bin_rock_nos);
+	
 	slice_sites_reefs <- slice_sites[slice_sites$environment %in% reef_environments,];
 	slice_sites_reefs <- slice_sites_reefs[!slice_sites_reefs$environment %in% "perireef or subreef",];
+	bin_rock_nos <- unique(slice_sites_reefs$pbdb_rock_no_sr[slice_sites_reefs$pbdb_rock_no_sr>0]);
 	if (nrow(slice_sites_reefs)>0)	{
 		bin_reef_rocks[ns] <- length(bin_rock_nos);
-		slice_reef_finds <- pbdb_data_list_smol$pbdb_finds[pbdb_data_list_smol$pbdb_finds$collection_no %in% slice_sites_reefs$collection_no,];
-		bin_rock_nos <- unique(slice_sites_reefs$pbdb_rock_no_sr[slice_sites_reefs$pbdb_rock_no_sr>0]);
+		slice_finds_reefs <- pbdb_data_list_smol$pbdb_finds[pbdb_data_list_smol$pbdb_finds$collection_no %in% slice_sites_reefs$collection_no,];
 		taxon <- reef_phyla;
-		phylum_reef_counts[ns,] <- sapply(taxon,count_taxa_from_pbdb_finds,pbdb_find_taxa=slice_reef_finds$phylum);
+		phylum_reef_counts[ns,] <- sapply(taxon,count_taxa_from_pbdb_finds,pbdb_find_taxa=slice_finds_reefs$phylum);
 		taxon <- reef_classes;
-		class_reef_counts[ns,] <- sapply(taxon,count_taxa_from_pbdb_finds,pbdb_find_taxa=slice_reef_finds$class);
+		class_reef_counts[ns,] <- sapply(taxon,count_taxa_from_pbdb_finds,pbdb_find_taxa=slice_finds_reefs$class);
 		rr <- 0;
 		while (rr < bin_reef_rocks[ns])	{
 			rr <- rr+1;
 			rock_coll_nos <- slice_sites_reefs$collection_no[slice_sites_reefs$pbdb_rock_no_sr == bin_rock_nos[rr]]
-			this_reef_finds <- slice_reef_finds[slice_reef_finds$collection_no %in% rock_coll_nos,];
+			this_reef_finds <- slice_finds_reefs[slice_finds_reefs$collection_no %in% rock_coll_nos,];
 #			rock_coll_nos
 			taxon <- reef_phyla;
 			phylum_counts <- sapply(taxon,count_taxa_from_pbdb_finds,pbdb_find_taxa=this_reef_finds$phylum);
 			if (max(phylum_counts)>1)	{
 				dom_phylum <- (1:rphyla)[phylum_counts %in% max(phylum_counts)];
-				pc <- bin_reef_rocks[ns]/sum(phylum_counts %in% max(phylum_counts));
+#				pc <- bin_reef_rocks[ns]/sum(phylum_counts %in% max(phylum_counts));
+				pc <- sum(phylum_counts %in% max(phylum_counts))/bin_reef_rocks[ns];
 				phylum_reef_dominance[ns,dom_phylum] <- phylum_reef_dominance[ns,dom_phylum]+pc;
 				}
 			taxon <- reef_classes;
 			class_counts <- sapply(taxon,count_taxa_from_pbdb_finds,pbdb_find_taxa=this_reef_finds$class);
 			if (max(class_counts)>1)	{
 				dom_class <- (1:rclass)[class_counts %in% max(class_counts)];
-				cc <- bin_reef_rocks[ns]/sum(class_counts %in% max(class_counts));
+				cc <- sum(class_counts %in% max(class_counts))/bin_reef_rocks[ns];
 				class_reef_dominance[ns,dom_class] <- class_reef_dominance[ns,dom_class]+cc;
 				}
 			}
@@ -116,6 +120,7 @@ oldest_interval <- "Ediacaran";
 youngest_interval <- "Quaternary";
 # get the time scale that will be plotted
 time_scale_to_plot <- unique(c(standard_time_scale$ma_lb,standard_time_scale$ma_ub));
+time_scale_to_plot[1] <- -abs(stage_slices$ma_lb[match("Ed3",stage_slices$interval)]);
 # Now, set the onset and end of the x-axis
 onset <- min(time_scale_to_plot);
 end <- max(time_scale_to_plot);
@@ -138,15 +143,26 @@ xsize <- 4;
 
 strat_names[strat_names=="Q"] <- "";
 strat_names[strat_names=="Ng"] <- "N";
-plot_title <- "Rocks with Sponge-Heavy Reefs*"			# Name of the plot; enter "" for nothing
+plot_title <- "Rocks with Reefs*"			# Name of the plot; enter "" for nothing
 Phanerozoic_Timescale_Plot_Flexible(onset,end,time_scale_to_plot,mxy,mny=(mny-(mxy-mny)/20),use_strat_labels=T,strat_names,strat_colors,plot_title,ordinate,abscissa="Ma",yearbreaks,xsize=xsize,ysize=ysize,hues=hues,colored=colored,alt_back=alt_back,strat_label_size=15);
-specified_axis(axe=2,max_val=mxy,min_val=mny,maj_break=0.1,med_break=0.05,min_break=0.01,linewd=4/3,orient=2,print_label=TRUE);
-
+specified_axis(axe=2,max_val=mxy,min_val=mny,maj_break=0.1,med_break=0.05,min_break=0.01,linewd=4/3,orient=2,print_label=TRUE,font="Franklin Gothic Medium");
 for (ns in 1:nslice)	if (reef_props[ns]>0)	rect(-stage_slices$ma_lb[ns],0,-stage_slices$ma_ub[ns],min(mxy,reef_props[ns]),col=stage_slices$color[ns],lwd=0.25);
+
+mxy <- 1.0;
+plot_title <- "Rocks with Sponge-Dominated Reefs*"			# Name of the plot; enter "" for nothing
+Phanerozoic_Timescale_Plot_Flexible(onset,end,time_scale_to_plot,mxy,mny=(mny-(mxy-mny)/20),use_strat_labels=T,strat_names,strat_colors,plot_title,ordinate,abscissa="Ma",yearbreaks,xsize=xsize,ysize=ysize,hues=hues,colored=colored,alt_back=alt_back,strat_label_size=15);
+specified_axis(axe=2,max_val=mxy,min_val=mny,maj_break=0.1,med_break=0.05,min_break=0.01,linewd=4/3,orient=2,print_label=TRUE,font="Franklin Gothic Medium");
+for (ns in 1:nslice)	if (bin_reef_rocks[ns]>=10 & phylum_reef_dominance$Porifera[ns])	rect(-stage_slices$ma_lb[ns],0,-stage_slices$ma_ub[ns],min(mxy,phylum_reef_dominance$Porifera[ns]),col=stage_slices$color[ns],lwd=0.25);
 
 plot_title <- "Rocks with Coral-Heavy Reefs*"			# Name of the plot; enter "" for nothing
 Phanerozoic_Timescale_Plot_Flexible(onset,end,time_scale_to_plot,mxy,mny=(mny-(mxy-mny)/20),use_strat_labels=T,strat_names,strat_colors,plot_title,ordinate,abscissa="Ma",yearbreaks,xsize=xsize,ysize=ysize,hues=hues,colored=colored,alt_back=alt_back,strat_label_size=15);
 specified_axis(axe=2,max_val=mxy,min_val=mny,maj_break=0.1,med_break=0.05,min_break=0.01,linewd=4/3,orient=2,print_label=TRUE);
+for (ns in 1:nslice)	if (bin_reef_rocks[ns]>=10 & phylum_reef_dominance$Cnidaria[ns])	rect(-stage_slices$ma_lb[ns],0,-stage_slices$ma_ub[ns],min(mxy,phylum_reef_dominance$Cnidaria[ns]),col=stage_slices$color[ns],lwd=0.25);
+
+plot_title <- "Rocks with Bivalve-Heavy Reefs*"			# Name of the plot; enter "" for nothing
+Phanerozoic_Timescale_Plot_Flexible(onset,end,time_scale_to_plot,mxy,mny=(mny-(mxy-mny)/20),use_strat_labels=T,strat_names,strat_colors,plot_title,ordinate,abscissa="Ma",yearbreaks,xsize=xsize,ysize=ysize,hues=hues,colored=colored,alt_back=alt_back,strat_label_size=15);
+specified_axis(axe=2,max_val=mxy,min_val=mny,maj_break=0.1,med_break=0.05,min_break=0.01,linewd=4/3,orient=2,print_label=TRUE);
+for (ns in 1:nslice)	if (bin_reef_rocks[ns]>=10 & class_reef_dominance$Bivalvia[ns])	rect(-stage_slices$ma_lb[ns],0,-stage_slices$ma_ub[ns],min(mxy,class_reef_dominance$Bivalvia[ns]),col=stage_slices$color[ns],lwd=0.25);
 
 
 {}

@@ -545,6 +545,8 @@ if (!is.na(match("THIS REQUEST RETURNED NO RECORDS",fetched)))	{
 		taxon_name <- desired_finds$identified_name;
 		print("Flagging uncertain taxonomic assignments.");
 		taxon_names <- desired_finds$identified_name;
+#		test <- vector(length=length(taxon_names))
+#		for (tn in 1:length(taxon_names))	test[tn] <- identify_taxonomic_uncertainty(taxon_names[tn]);
 		desired_finds$flags <- pbapply::pbsapply(taxon_names,identify_taxonomic_uncertainty);
 
 #		flags1 <- pbapply::pbsapply(taxon_name,revelare_uncertain_species_assignments);
@@ -4174,9 +4176,9 @@ if (nnames==2)	{
 #taxon_name <- "Redlichia chinensis - Kootenia gimmelfarbi" taxon_name <- "lower Fungochitina spinfera"
 # taxon_name <- "Eospirifer"
 # routine to separate species name from genus or genus (subgenus) name
-divido_genus_names_from_species_names <- function(taxon_name)	{
+divido_genus_names_from_species_names <- function(species_name)	{
 #print(taxon_name);
-k <- stringr::str_split(taxon_name,pattern="<")[[1]];
+k <- stringr::str_split(species_name,pattern="<")[[1]];
 j <- stringr::str_split(k[1:(length(k)-1)],pattern=" ")[[1]];
 #j <- stringr::str_split(taxon_name,pattern=" ")[[1]];
 zone_detritus <- c("basal","lowermost","lower","middle","upper","uppermost","top");
@@ -4569,7 +4571,7 @@ taxon_name <- gsub("n. gen. ","",taxon_name);
 taxon_name <- gsub("n. sp. ","",taxon_name);
 taxon_name <- gsub("n. subgen. ","",taxon_name);
 #species_epithet <- mundify_taxon_names(taxon_name=divido_species_epithets(cleaned_name));
-whole_genus_name <- divido_genus_names_from_species_names(taxon_name=cleaned_name);
+whole_genus_name <- divido_genus_names_from_species_names(species_name=cleaned_name);
 gen_subgen <- divido_subgenus_names_from_genus_names(genus_name=whole_genus_name);
 genus_name <- mundify_taxon_names(taxon_name=gen_subgen[1]);
 genus_name_check <- divido_subgenus_names_from_genus_names(genus_name=divido_genus_names_from_species_names(taxon_name))[1];
@@ -4682,6 +4684,11 @@ if (length(simplify2array(strsplit(taxon_name," ")[[1]]))==2)	{
 	} else	{
 	return(F);
 	}
+}
+
+#species_name <- "Eostropheodonta (Eostropheodonta) chilcaensis"
+is.species.in.subgenus <- function(species_name)	{
+return(is.subgenus(divido_genus_names_from_species_names(species_name)));
 }
 
 is.eponymous.subgenus <- function(taxon_name)	{

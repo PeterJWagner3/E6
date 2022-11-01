@@ -500,7 +500,7 @@ pbdb_sites_refined$ma_ub[effed] <- finest_chronostrat$ma_ub[match(pbdb_sites_ref
 # update rock numbers if need be
 rock_database <- rock_unit_data$rock_unit_database;
 pbdb_sites_refined$rock_no_sr[pbdb_sites_refined$rock_no>0] <- rock_database$rock_no_sr[match(pbdb_sites_refined$rock_no[pbdb_sites_refined$rock_no>0],rock_database$rock_no)];
-beepr:beep("wilhelm");
+beepr::beep("wilhelm");
 # add PBDB Rock numbers ####
 print("Add numbers to rock units from recently created database.");
 p_r_s_l <- length(pbdb_rocks_site_lists);
@@ -514,7 +514,7 @@ for (pr in 1:p_r_s_l)	{
 	pbdb_sites_refined$pbdb_rock_no_sr[pbdb_rows] <- pbdb_rocks_redone$rock_no_sr[rd];
 	pbdb_sites_refined$pbdb_formation_no[pbdb_rows] <- pbdb_rocks_redone$formation_no[rd];
 	}
-beepr:beep("wilhelm");
+beepr::beep("wilhelm");
 # deal with duds ####
 nsites <- nrow(pbdb_sites_refined);
 dud_sites <- (1:nsites)[pbdb_sites_refined$ma_lb<=pbdb_sites_refined$ma_ub];
@@ -572,7 +572,7 @@ pbdb_sites_refined$interval_ub <- pbapply::pbsapply(age,rebin_collection_with_ti
 single_binners <- cbind(single_binners,single_binners_z);
 colnames(single_binners)[ncol(single_binners)] <- new_singles;
 write.csv(single_binners,"Single_Binners.csv",row.names = F);
-beepr:beep("wilhelm");
+beepr::beep("wilhelm");
 
 # deal with duds 2 ####
 nsites <- nrow(pbdb_sites_refined);
@@ -650,13 +650,17 @@ pbdb_data_list$time_scale <- finest_chronostrat;
 pbdb_data_list$pbdb_rocks <- pbdb_rocks_redone;
 pbdb_data_list$pbdb_rocks_sites <- pbdb_rocks_sites;
 pbdb_data_list$single_binners <- single_binners;
-save(pbdb_data_list,file=paste(getwd(),"/data/Paleobiology_Database.RData",sep=""));
+#save(pbdb_data_list,file=paste(getwd(),"/data/Paleobiology_Database.RData",sep=""));
 save(pbdb_data_list,file=paste("~/Documents/R_Projects/Data_for_R/Paleobiology_Database.RData",sep=""));
-save(pbdb_data_list,file=paste("~/Documents/R_Projects/Marine_Tetrapod_Diversification/data/Paleobiology_Database.RData",sep=""));
+#save(pbdb_data_list,file=paste("~/Documents/R_Projects/Marine_Tetrapod_Diversification/data/Paleobiology_Database.RData",sep=""));
 
-pbdb_data_list_for_class <- list(pbdb_sites_refined,pbdb_finds,pbdb_taxonomy,finest_chronostrat);
-names(pbdb_data_list_for_class) <- c("pbdb_sites","pbdb_finds","pbdb_taxonomy","time_scale");
-save(pbdb_data_list_for_class,file=paste("~/Documents/R_Projects/Data_for_R/PBDB_Data_for_Invert_Paleo.RData",sep=""));
+pbdb_data_list_smol <- list(pbdb_data_list$pbdb_sites_refined,pbdb_data_list$pbdb_finds,pbdb_data_list$pbdb_taxonomy,pbdb_data_list$time_scale[pbdb_data_list$time_scale$scale=="Stage Slice",]);
+names(pbdb_data_list_smol) <- c("pbdb_sites","pbdb_finds","pbdb_taxonomy","time_scale");
+save(pbdb_data_list_smol,file=paste(data_for_r,"/PBDB_Data_Smøl.RData",sep=""));
+#pbdb_data_list_for_class <- list(pbdb_sites_refined,pbdb_finds,pbdb_taxonomy,finest_chronostrat);
+#names(pbdb_data_list_for_class) <- c("pbdb_sites","pbdb_finds","pbdb_taxonomy","time_scale");
+#save(pbdb_data_list_for_class,file=paste("~/Documents/R_Projects/Data_for_R/PBDB_Data_for_Invert_Paleo.RData",sep=""));
+beepr::beep("wilhelm");
 }
 
 {}
